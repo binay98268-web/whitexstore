@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — WHITE X STORE</title>
+<link rel="stylesheet" href="assets/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+.admin-wrap { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 240px;
+  background: rgba(0,0,0,0.4);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  position: fixed;
+  top: 70px;
+  bottom: 0;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+body.light .sidebar { background: rgba(255,255,255,0.7); }
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.3s;
+}
+.sidebar-item:hover {
+  background: rgba(0,229,255,0.08);
+  border-left-color: var(--accent);
+}
+.sidebar-item.active {
+  background: rgba(0,229,255,0.15);
+  border-left-color: var(--accent);
+  color: var(--accent);
+}
+.sidebar-item span.icon { font-size: 18px; width: 22px; text-align: center; }
+.admin-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 30px;
+  max-width: 100%;
+}
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.admin-header h1 { font-family: 'Orbitron', sans-serif; font-size: 26px; }
+.admin-header h1 span { color: var(--accent); text-shadow: 0 0 20px var(--accent); }
+.admin-badge {
+  background: linear-gradient(135deg, var(--accent), #0077ff);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+  margin-bottom: 30px;
+}
+.admin-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  backdrop-filter: blur(10px);
+}
+.admin-stat .label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.admin-stat .value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 28px;
+  color: var(--accent);
+  font-weight: 700;
+}
+.section { display: none; }
+.section.active { display: block; }
+.btn {
+  padding: 12px 22px;
+  background: linear-gradient(135deg, var(--accent), #0077ff);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+}
+.btn:hover { box-shadow: 0 0 20px var(--accent); }
+.btn.secondary {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.data-table th {
+  background: rgba(0,229,255,0.1);
+  padding: 14px;
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+.data-table td {
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+.data-table tr:hover { background: rgba(0,229,255,0.05); }
+.action-icons { display: flex; gap: 8px; }
+.icon-btn {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+.icon-btn.danger:hover { border-color: #ff3355; color: #ff3355; }
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-bg.active { display: flex; }
+.modal {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal h3 {
+  font-family: 'Orbitron', sans-serif;
+  margin-bottom: 20px;
+  color: var(--accent);
+}
+.modal .form-group { margin-bottom: 16px; }
+.modal label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.modal input, .modal textarea, .modal select {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+body.light .modal input,
+body.light .modal textarea,
+body.light .modal select { background: rgba(255,255,255,0.8); }
+.modal input:focus, .modal textarea:focus, .modal select:focus { border-color: var(--accent); }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-actions button { flex: 1; }
+.loading { text-align: center; padding: 40px; color: var(--accent); font-size: 16px; }
+@media (max-width: 768px) {
+  .sidebar { position: fixed; top: 0; left: -260px; z-index: 999; height: 100vh; transition: left 0.3s; }
+  .sidebar.open { left: 0; }
+  .admin-content { margin-left: 0; padding: 20px 15px; }
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 10px 8px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="wall3d"></canvas>
+
+<nav class="navbar">
+  <div class="logo"><span class="logo-x">X</span> ADMIN PANEL</div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="products.html">Store</a>
+    <a href="#" id="logoutBtn" style="color:#ff5555;">Logout</a>
+    <button id="themeToggle" class="theme-btn">🌙</button>
+  </div>
+</nav>
+
+<div class="admin-wrap">
+
+  <div class="sidebar" id="sidebar">
+    <a class="sidebar-item active" data-section="dashboard"><span class="icon">📊</span> Dashboard</a>
+    <a class="sidebar-item" data-section="products"><span class="icon">📦</span> Products</a>
+    <a class="sidebar-item" data-section="orders"><span class="icon">📋</span> Orders</a>
+    <a class="sidebar-item" data-section="users"><span class="icon">👥</span> Users</a>
+    <a class="sidebar-item" data-section="wallet"><span class="icon">💰</span> Wallet Topups</a>
+  </div>
+
+  <div class="admin-content">
+
+    <div class="section active" id="section-dashboard">
+      <div class="admin-header">
+        <h1>Admin <span>Dashboard</span></h1>
+        <div class="admin-badge">👑 ADMIN</div>
+      </div>
+      <div class="stats-row">
+        <div class="admin-stat">
+          <div class="label">Total Users</div>
+          <div class="value" id="statUsers">-</div>
+        </div>
+        <div class="admin-stat">
+          <div class="label">Total Products</div>
+          <div class="value" id="statProducts">-</div>
+        </div>
+        <div class="admin-stat">
+          <div class="label">Total Orders</div>
+          <div class="value" id="statOrders">-</div>
+        </div>
+        <div class="admin-stat">
+          <div class="label">Total Sales</div>
+          <div class="value" id="statSales">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="section-products">
+      <div class="admin-header">
+        <h1>Manage <span>Products</span></h1>
+        <button class="btn" id="addProductBtn">➕ Add Product</button>
+      </div>
+      <div id="productsList"><div class="loading">⏳ Loading products...</div></div>
+    </div>
+
+    <div class="section" id="section-orders">
+      <div class="admin-header">
+        <h1>Manage <span>Orders</span></h1>
+      </div>
+      <div id="ordersList"><div class="loading">⏳ Loading orders...</div></div>
+    </div>
+
+    <div class="section" id="section-users">
+      <div class="admin-header">
+        <h1>Manage <span>Users</span></h1>
+      </div>
+      <div id="usersList"><div class="loading">⏳ Loading users...</div></div>
+    </div>
+
+    <div class="section" id="section-wallet">
+      <div class="admin-header">
+        <h1>Wallet <span>Topups</span></h1>
+      </div>
+      <div id="walletList"><div class="loading">⏳ Loading topups...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-bg" id="productModal">
+  <div class="modal">
+    <h3 id="modalTitle">Add Product</h3>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label>Product Name</label>
+      <input type="text" id="pName" placeholder="e.g. AIM HACK PROXY">
+    </div>
+    <div class="form-group">
+      <label>Category</label>
+      <select id="pCategory">
+        <option value="NON ROOT ANDROID">Non-Root Android</option>
+        <option value="ROOT ANDROID">Root Android</option>
+        <option value="IOS">iOS</option>
+        <option value="PC PANEL">PC Panel</option>
+        <option value="GUILD BOT">Guild Bot</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="pDesc" rows="3" placeholder="Product description..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Price (Rs)</label>
+      <input type="number" id="pPrice" placeholder="100" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>Image URL (optional)</label>
+      <input type="text" id="pImage" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>Stock</label>
+      <input type="number" id="pStock" value="100">
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="cancelModal">Cancel</button>
+      <button class="btn" id="saveProduct">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/script.js"></script>
+<script>
+const token = localStorage.getItem('token');
+const userStr = localStorage.getItem('user');
+
+if (!token || !userStr) {
+  alert('Please login first!');
+  window.location.href = 'login.html';
+}
+
+const user = JSON.parse(userStr || '{}');
+
+if (!user.is_reseller && user.email !== 'admin@whitex.com') {
+  alert('Access Denied! Admin only.');
+  window.location.href = 'dashboard.html';
+}
+
+document.getElementById('logoutBtn').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (confirm('Logout?')) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
+});
+
+document.querySelectorAll('.sidebar-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    item.classList.add('active');
+    const section = item.dataset.section;
+    document.getElementById('section-' + section).classList.add('active');
+    if (section === 'products') loadProducts();
+    if (section === 'orders') loadOrders();
+    if (section === 'users') loadUsers();
+    if (section === 'wallet') loadWallet();
+  });
+});
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/admin-stats', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      document.getElementById('statUsers').textContent = data.users || 0;
+      document.getElementById('statProducts').textContent = data.products || 0;
+      document.getElementById('statOrders').textContent = data.orders || 0;
+      document.getElementById('statSales').textContent = 'Rs ' + (data.sales || 0);
+    }
+  } catch (err) { console.log('Stats error:', err); }
+}
+
+async function loadProducts() {
+  const box = document.getElementById('productsList');
+  box.innerHTML = '<div class="loading">⏳ Loading...</div>';
+  try {
+    const res = await fetch('/api/products');
+    const data = await res.json();
+    const products = data.products || [];
+    if (products.length === 0) {
+      box.innerHTML = '<div class="loading">No products yet. Add one!</div>';
+      return;
+    }
+    box.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${products.map(p => `
+            <tr>
+              <td>#${p.id}</td>
+              <td>${p.name}</td>
+              <td>${p.category || '-'}</td>
+              <td>Rs ${p.price}</td>
+              <td>${p.stock || 0}</td>
+              <td>
+                <div class="action-icons">
+                  <button class="icon-btn" onclick="editProduct(${p.id})">✏️</button>
+                  <button class="icon-btn danger" onclick="deleteProduct(${p.id})">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    window.allProducts = products;
+  } catch (err) {
+    box.innerHTML = '<div class="loading">❌ Error: ' + err.message + '</div>';
+  }
+}
+
+async function loadOrders() {
+  const box = document.getElementById('ordersList');
+  box.innerHTML = '<div class="loading">⏳ Loading...</div>';
+  try {
+    const res = await fetch('/api/admin-orders', { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    const orders = data.orders || [];
+    if (orders.length === 0) {
+      box.innerHTML = '<div class="loading">No orders yet.</div>';
+      return;
+    }
+    box.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Order #</th><th>User</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          ${orders.map(o => `
+            <tr>
+              <td>#${o.id}</td>
+              <td>${o.user_email || '-'}</td>
+              <td>Rs ${o.amount}</td>
+              <td>${o.status}</td>
+              <td>${new Date(o.created_at).toLocaleDateString()}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    box.innerHTML = '<div class="loading">❌ Error loading orders</div>';
+  }
+}
+
+async function loadUsers() {
+  const box = document.getElementById('usersList');
+  box.innerHTML = '<div class="loading">⏳ Loading...</div>';
+  try {
+    const res = await fetch('/api/admin-users', { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    const users = data.users || [];
+    box.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Country</th><th>Wallet</th><th>Reseller</th></tr></thead>
+        <tbody>
+          ${users.map(u => `
+            <tr>
+              <td>#${u.id}</td>
+              <td>${u.name || '-'}</td>
+              <td>${u.email}</td>
+              <td>${u.country || '-'}</td>
+              <td>Rs ${u.wallet || 0}</td>
+              <td>${u.is_reseller ? '✅' : '❌'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    box.innerHTML = '<div class="loading">❌ Error loading users</div>';
+  }
+}
+
+async function loadWallet() {
+  const box = document.getElementById('walletList');
+  box.innerHTML = '<div class="loading">⏳ Loading...</div>';
+  try {
+    const res = await fetch('/api/admin-wallet', { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    const txns = data.transactions || [];
+    if (txns.length === 0) {
+      box.innerHTML = '<div class="loading">No wallet topups yet.</div>';
+      return;
+    }
+    box.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          ${txns.map(t => `
+            <tr>
+              <td>#${t.id}</td>
+              <td>${t.user_email || '-'}</td>
+              <td>Rs ${t.amount}</td>
+              <td>${t.status}</td>
+              <td>${new Date(t.created_at).toLocaleDateString()}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    box.innerHTML = '<div class="loading">❌ Error loading topups</div>';
+  }
+}
+
+const productModal = document.getElementById('productModal');
+
+document.getElementById('addProductBtn').addEventListener('click', () => {
+  document.getElementById('modalTitle').textContent = 'Add Product';
+  document.getElementById('editId').value = '';
+  document.getElementById('pName').value = '';
+  document.getElementById('pCategory').value = 'NON ROOT ANDROID';
+  document.getElementById('pDesc').value = '';
+  document.getElementById('pPrice').value = '';
+  document.getElementById('pImage').value = '';
+  document.getElementById('pStock').value = '100';
+  productModal.classList.add('active');
+});
+
+document.getElementById('cancelModal').addEventListener('click', () => {
+  productModal.classList.remove('active');
+});
+
+function editProduct(id) {
+  const p = (window.allProducts || []).find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modalTitle').textContent = 'Edit Product';
+  document.getElementById('editId').value = p.id;
+  document.getElementById('pName').value = p.name || '';
+  document.getElementById('pCategory').value = p.category || 'NON ROOT ANDROID';
+  document.getElementById('pDesc').value = p.description || '';
+  document.getElementById('pPrice').value = p.price || '';
+  document.getElementById('pImage').value = p.image || '';
+  document.getElementById('pStock').value = p.stock || 100;
+  productModal.classList.add('active');
+}
+
+document.getElementById('saveProduct').addEventListener('click', async () => {
+  const id = document.getElementById('editId').value;
+  const body = {
+    name: document.getElementById('pName').value.trim(),
+    category: document.getElementById('pCategory').value,
+    description: document.getElementById('pDesc').value.trim(),
+    price: parseFloat(document.getElementById('pPrice').value),
+    image: document.getElementById('pImage').value.trim(),
+    stock: parseInt(document.getElementById('pStock').value)
+  };
+  if (!body.name || !body.price) {
+    alert('Name and price required!');
+    return;
+  }
+  const url = id ? '/api/admin-products-update' : '/api/admin-products-add';
+  if (id) body.id = parseInt(id);
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      productModal.classList.remove('active');
+      loadProducts();
+      loadStats();
+    } else {
+      alert('Error: ' + (data.error || 'Failed'));
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+});
+
+async function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  try {
+    const res = await fetch('/api/admin-products-delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      loadProducts();
+      loadStats();
+    } else {
+      alert('Error: ' + (data.error || 'Failed'));
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+loadStats();
+</script>
+
+</body>
+</html>
