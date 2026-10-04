@@ -46,7 +46,6 @@
   font-size: 15px;
   font-family: inherit;
   outline: none;
-  transition: border 0.3s;
 }
 body.light .form-group input,
 body.light .form-group select {
@@ -65,6 +64,71 @@ body.light .form-group select option {
   background: #fff;
   color: #000;
 }
+
+/* CAPTCHA BOX */
+.captcha-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.3s;
+}
+body.light .captcha-box {
+  background: rgba(255,255,255,0.6);
+}
+.captcha-box:hover {
+  border-color: var(--accent);
+}
+.captcha-box.checked {
+  background: rgba(50,255,100,0.1);
+  border-color: #22dd66;
+}
+.captcha-check {
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: transparent;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+.captcha-box.checked .captcha-check {
+  background: #22dd66;
+  border-color: #22dd66;
+  color: #fff;
+}
+.captcha-label {
+  font-weight: 600;
+  font-size: 15px;
+  flex: 1;
+}
+.captcha-badge {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  opacity: 0.7;
+  font-weight: 700;
+}
+.captcha-box.loading .captcha-check {
+  border-color: var(--accent);
+  border-top-color: transparent;
+  animation: spin 0.7s linear infinite;
+  color: transparent;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .submit-btn {
   width: 100%;
   padding: 15px;
@@ -196,6 +260,13 @@ body.light .form-group select option {
       <input type="password" id="password" placeholder="Minimum 6 characters" minlength="6" required>
     </div>
 
+    <!-- CAPTCHA BOX -->
+    <div class="captcha-box" id="captchaBox">
+      <div class="captcha-check" id="captchaCheck">✓</div>
+      <div class="captcha-label">I'm not a robot</div>
+      <div class="captcha-badge">SECURE</div>
+    </div>
+
     <button type="submit" class="submit-btn" id="submitBtn">🚀 Register</button>
     <div class="msg" id="msg"></div>
   </form>
@@ -207,11 +278,35 @@ body.light .form-group select option {
 
 <script src="assets/script.js"></script>
 <script>
+// CAPTCHA LOGIC
+let captchaVerified = false;
+const captchaBox = document.getElementById('captchaBox');
+
+captchaBox.addEventListener('click', () => {
+  if (captchaVerified || captchaBox.classList.contains('loading')) return;
+
+  captchaBox.classList.add('loading');
+
+  setTimeout(() => {
+    captchaBox.classList.remove('loading');
+    captchaBox.classList.add('checked');
+    captchaVerified = true;
+  }, 1200);
+});
+
+// REGISTER FORM
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const btn = document.getElementById('submitBtn');
   const msg = document.getElementById('msg');
+
+  if (!captchaVerified) {
+    msg.className = 'msg error';
+    msg.textContent = '❌ Please verify you are not a robot';
+    msg.style.display = 'block';
+    return;
+  }
 
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
