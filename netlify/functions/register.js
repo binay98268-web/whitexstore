@@ -12,13 +12,13 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { name, email, password } = JSON.parse(event.body);
+    const { name, email, phone, country, password } = JSON.parse(event.body);
 
-    if (!name || !email || !password) {
+    if (!name || !email || !phone || !country || !password) {
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'सब fields भरो' })
+        body: JSON.stringify({ error: 'All fields are required' })
       };
     }
 
@@ -26,15 +26,15 @@ exports.handler = async (event) => {
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Password कम से कम 6 अक्षर का हो' })
+        body: JSON.stringify({ error: 'Password must be at least 6 characters' })
       };
     }
 
     const hash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email',
-      [name, email.toLowerCase(), hash]
+      'INSERT INTO users (name, email, phone, country, password_hash) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, phone, country',
+      [name, email.toLowerCase(), phone, country, hash]
     );
 
     return {
@@ -50,7 +50,7 @@ exports.handler = async (event) => {
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'ये ईमेल पहले से registered है' })
+        body: JSON.stringify({ error: 'This email is already registered' })
       };
     }
     return {
