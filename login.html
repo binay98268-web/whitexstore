@@ -129,7 +129,7 @@ body.light .form-group input {
 
     <div class="form-group">
       <label>🔒 Password</label>
-      <input type="password" id="password" placeholder="अपना password डालो" required>
+      <input type="password" id="password" placeholder="Enter your password" required>
     </div>
 
     <button type="submit" class="submit-btn" id="submitBtn">🔓 Login</button>
@@ -137,7 +137,7 @@ body.light .form-group input {
   </form>
 
   <div class="bottom-link">
-    Account नहीं है? <a href="register.html">Register करो</a>
+    Don't have an account? <a href="register.html">Register</a>
   </div>
 </div>
 
@@ -171,7 +171,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       localStorage.setItem('user', JSON.stringify(data.user));
 
       msg.className = 'msg success';
-      msg.textContent = '✅ Login successful! Dashboard पर भेज रहे हैं...';
+      msg.textContent = '✅ Login successful! Redirecting...';
       msg.style.display = 'block';
 
       setTimeout(() => {
