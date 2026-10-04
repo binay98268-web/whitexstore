@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store — WHITE X STORE</title>
+<link rel="stylesheet" href="assets/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 22px;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.category-bar {
+  display: flex;
+  gap: 12px;
+  padding: 20px 40px;
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+.cat-btn {
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cat-btn.active, .cat-btn:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 20px var(--accent);
+}
+.product-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  backdrop-filter: blur(10px);
+}
+.product-cat {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.product-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  margin-bottom: 12px;
+  min-height: 40px;
+}
+.product-desc {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 18px;
+  min-height: 40px;
+}
+.product-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.buy-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), #0077ff);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+.page-title {
+  text-align: center;
+  padding: 50px 20px 20px;
+}
+.page-title h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+.page-title h1 span {
+  color: var(--accent);
+  text-shadow: 0 0 25px var(--accent);
+}
+.page-title p {
+  opacity: 0.7;
+  letter-spacing: 3px;
+}
+.loading {
+  text-align: center;
+  padding: 60px;
+  font-size: 20px;
+  color: var(--accent);
+}
+@media (max-width: 768px) {
+  .products-grid { padding: 20px; gap: 15px; }
+  .page-title h1 { font-size: 28px; }
+  .category-bar { padding: 15px 20px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="wall3d"></canvas>
+
+<nav class="navbar">
+  <div class="logo"><span class="logo-x">X</span> WHITE X STORE</div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="products.html">Store</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+    <button id="themeToggle" class="theme-btn">🌙</button>
+  </div>
+</nav>
+
+<div class="page-title">
+  <h1>Our <span>Store</span></h1>
+  <p>FAST · SAFE · TRUSTED</p>
+</div>
+
+<div class="category-bar" id="categoryBar">
+  <button class="cat-btn active" data-cat="all">All Products</button>
+  <button class="cat-btn" data-cat="NON ROOT ANDROID">Non-Root Android</button>
+  <button class="cat-btn" data-cat="ROOT ANDROID">Root Android</button>
+  <button class="cat-btn" data-cat="IOS">iOS</button>
+  <button class="cat-btn" data-cat="PC PANEL">PC Panel</button>
+</div>
+
+<div class="products-grid" id="productsGrid">
+  <div class="loading" style="grid-column: 1/-1;">⏳ Loading Products...</div>
+</div>
+
+<script src="assets/script.js"></script>
+<script>
+let allProducts = [];
+
+async function loadProducts() {
+  try {
+    const res = await fetch('/api/products');
+    const data = await res.json();
+    allProducts = data.products || [];
+    renderProducts(allProducts);
+  } catch (err) {
+    document.getElementById('productsGrid').innerHTML =
+      '<div class="loading" style="grid-column:1/-1;">❌ Error: ' + err.message + '</div>';
+  }
+}
+
+function renderProducts(products) {
+  const grid = document.getElementById('productsGrid');
+  if (products.length === 0) {
+    grid.innerHTML = '<div class="loading" style="grid-column:1/-1;">कोई product नहीं मिला</div>';
+    return;
+  }
+  grid.innerHTML = products.map(p => `
+    <div class="product-card">
+      <div class="product-cat">${p.category || 'PRODUCT'}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-desc">${(p.description || '').substring(0, 80)}...</div>
+      <div class="product-price">From Rs ${p.price}</div>
+      <button class="buy-btn">🛒 Buy Now</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('categoryBar').addEventListener('click', (e) => {
+  if (!e.target.classList.contains('cat-btn')) return;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  const cat = e.target.dataset.cat;
+  if (cat === 'all') renderProducts(allProducts);
+  else renderProducts(allProducts.filter(p => p.category.includes(cat)));
+});
+
+loadProducts();
+</script>
+
+</body>
+</html>
