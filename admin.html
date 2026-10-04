@@ -18,8 +18,10 @@
   bottom: 0;
   overflow-y: auto;
   backdrop-filter: blur(10px);
+  transition: left 0.3s ease;
+  z-index: 999;
 }
-body.light .sidebar { background: rgba(255,255,255,0.7); }
+body.light .sidebar { background: rgba(255,255,255,0.95); }
 .sidebar-item {
   display: flex;
   align-items: center;
@@ -48,6 +50,7 @@ body.light .sidebar { background: rgba(255,255,255,0.7); }
   margin-left: 240px;
   padding: 30px;
   max-width: 100%;
+  transition: margin-left 0.3s;
 }
 .admin-header {
   display: flex;
@@ -200,12 +203,40 @@ body.light .modal select { background: rgba(255,255,255,0.8); }
 .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 .modal-actions button { flex: 1; }
 .loading { text-align: center; padding: 40px; color: var(--accent); font-size: 16px; }
+
+/* HAMBURGER BUTTON */
+.menu-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 700;
+}
+.menu-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 998;
+}
+.overlay.active { display: block; }
+
 @media (max-width: 768px) {
-  .sidebar { position: fixed; top: 0; left: -260px; z-index: 999; height: 100vh; transition: left 0.3s; }
+  .sidebar { top: 0; left: -280px; height: 100vh; width: 260px; padding-top: 20px; }
   .sidebar.open { left: 0; }
   .admin-content { margin-left: 0; padding: 20px 15px; }
   .data-table { font-size: 12px; }
   .data-table th, .data-table td { padding: 10px 8px; }
+  .menu-btn { display: block; }
+  .admin-header h1 { font-size: 20px; }
 }
 </style>
 </head>
@@ -214,14 +245,18 @@ body.light .modal select { background: rgba(255,255,255,0.8); }
 <canvas id="wall3d"></canvas>
 
 <nav class="navbar">
-  <div class="logo"><span class="logo-x">X</span> ADMIN PANEL</div>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <button class="menu-btn" id="menuBtn">☰</button>
+    <div class="logo"><span class="logo-x">X</span> ADMIN</div>
+  </div>
   <div class="nav-links">
     <a href="index.html">Home</a>
-    <a href="products.html">Store</a>
     <a href="#" id="logoutBtn" style="color:#ff5555;">Logout</a>
     <button id="themeToggle" class="theme-btn">🌙</button>
   </div>
 </nav>
+
+<div class="overlay" id="overlay"></div>
 
 <div class="admin-wrap">
 
@@ -350,6 +385,19 @@ if (!user.is_reseller && user.email !== 'admin@whitex.com') {
   window.location.href = 'dashboard.html';
 }
 
+// SIDEBAR TOGGLE (Mobile)
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const menuBtn = document.getElementById('menuBtn');
+
+function toggleSidebar() {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('active');
+}
+
+menuBtn.addEventListener('click', toggleSidebar);
+overlay.addEventListener('click', toggleSidebar);
+
 document.getElementById('logoutBtn').addEventListener('click', (e) => {
   e.preventDefault();
   if (confirm('Logout?')) {
@@ -366,6 +414,9 @@ document.querySelectorAll('.sidebar-item').forEach(item => {
     item.classList.add('active');
     const section = item.dataset.section;
     document.getElementById('section-' + section).classList.add('active');
+
+    if (window.innerWidth <= 768) toggleSidebar();
+
     if (section === 'products') loadProducts();
     if (section === 'orders') loadOrders();
     if (section === 'users') loadUsers();
@@ -400,6 +451,7 @@ async function loadProducts() {
       return;
     }
     box.innerHTML = `
+      <div style="overflow-x:auto;">
       <table class="data-table">
         <thead><tr><th>ID</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead>
         <tbody>
@@ -420,6 +472,7 @@ async function loadProducts() {
           `).join('')}
         </tbody>
       </table>
+      </div>
     `;
     window.allProducts = products;
   } catch (err) {
@@ -439,6 +492,7 @@ async function loadOrders() {
       return;
     }
     box.innerHTML = `
+      <div style="overflow-x:auto;">
       <table class="data-table">
         <thead><tr><th>Order #</th><th>User</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
         <tbody>
@@ -453,6 +507,7 @@ async function loadOrders() {
           `).join('')}
         </tbody>
       </table>
+      </div>
     `;
   } catch (err) {
     box.innerHTML = '<div class="loading">❌ Error loading orders</div>';
@@ -467,6 +522,7 @@ async function loadUsers() {
     const data = await res.json();
     const users = data.users || [];
     box.innerHTML = `
+      <div style="overflow-x:auto;">
       <table class="data-table">
         <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Country</th><th>Wallet</th><th>Reseller</th></tr></thead>
         <tbody>
@@ -482,6 +538,7 @@ async function loadUsers() {
           `).join('')}
         </tbody>
       </table>
+      </div>
     `;
   } catch (err) {
     box.innerHTML = '<div class="loading">❌ Error loading users</div>';
@@ -500,6 +557,7 @@ async function loadWallet() {
       return;
     }
     box.innerHTML = `
+      <div style="overflow-x:auto;">
       <table class="data-table">
         <thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
         <tbody>
@@ -514,6 +572,7 @@ async function loadWallet() {
           `).join('')}
         </tbody>
       </table>
+      </div>
     `;
   } catch (err) {
     box.innerHTML = '<div class="loading">❌ Error loading topups</div>';
