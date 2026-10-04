@@ -183,41 +183,41 @@
 <div class="dash-wrap">
 
   <div class="welcome-box">
-    <h1>नमस्ते, <span id="userName">User</span>! 👋</h1>
+    <h1>Welcome, <span id="userName">User</span>! 👋</h1>
     <p>📧 <span id="userEmail">-</span></p>
   </div>
 
   <div class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon">💰</div>
-      <div class="stat-label">वॉलेट बैलेंस</div>
+      <div class="stat-label">Wallet Balance</div>
       <div class="stat-value" id="walletBalance">Rs 0</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">📦</div>
-      <div class="stat-label">कुल ऑर्डर</div>
+      <div class="stat-label">Total Orders</div>
       <div class="stat-value" id="totalOrders">0</div>
     </div>
     <div class="stat-card">
       <div class="stat-icon">🔑</div>
-      <div class="stat-label">मेरी Keys</div>
+      <div class="stat-label">My Keys</div>
       <div class="stat-value" id="totalKeys">0</div>
     </div>
   </div>
 
   <div class="action-bar">
-    <a href="products.html" class="action-btn">🛒 प्रोडक्ट्स खरीदो</a>
-    <a href="#" class="action-btn secondary" id="addMoneyBtn">💰 वॉलेट में पैसे डालो</a>
-    <a href="index.html" class="action-btn secondary">🏠 होम पर जाओ</a>
+    <a href="products.html" class="action-btn">🛒 Buy Products</a>
+    <a href="#" class="action-btn secondary" id="addMoneyBtn">💰 Add Money</a>
+    <a href="index.html" class="action-btn secondary">🏠 Go Home</a>
   </div>
 
-  <h2 class="section-title">📦 मेरे ऑर्डर</h2>
+  <h2 class="section-title">📦 My Orders</h2>
 
   <div id="ordersBox">
     <div class="empty-state">
-      <h3>अभी तक कोई ऑर्डर नहीं किया</h3>
-      <p>स्टोर पर जाओ और अपना पहला प्रोडक्ट खरीदो!</p>
-      <a href="products.html" class="action-btn" style="display:inline-block;max-width:250px;">🛒 स्टोर देखो</a>
+      <h3>No Orders Yet</h3>
+      <p>Go to the store and make your first purchase!</p>
+      <a href="products.html" class="action-btn" style="display:inline-block;max-width:250px;">🛒 Browse Store</a>
     </div>
   </div>
 
@@ -230,7 +230,7 @@ const token = localStorage.getItem('token');
 const userStr = localStorage.getItem('user');
 
 if (!token || !userStr) {
-  alert('पहले Login करो!');
+  alert('Please login first!');
   window.location.href = 'login.html';
 }
 
@@ -244,7 +244,7 @@ document.getElementById('walletBalance').textContent = 'Rs ' + (user.wallet || 0
 // Logout
 document.getElementById('logoutBtn').addEventListener('click', (e) => {
   e.preventDefault();
-  if (confirm('Logout करना है?')) {
+  if (confirm('Do you want to logout?')) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = 'index.html';
@@ -254,10 +254,10 @@ document.getElementById('logoutBtn').addEventListener('click', (e) => {
 // Add money (placeholder)
 document.getElementById('addMoneyBtn').addEventListener('click', (e) => {
   e.preventDefault();
-  alert('💰 वॉलेट टॉपअप जल्द ही आ रहा है!\n\nअभी के लिए Admin से संपर्क करो।');
+  alert('💰 Wallet topup coming soon!\n\nFor now, contact admin.');
 });
 
-// Load orders (अगले step में)
+// Load orders (next step)
 async function loadOrders() {
   try {
     const res = await fetch('/api/orders', {
@@ -275,7 +275,7 @@ async function loadOrders() {
         <div class="order-item">
           <div>
             <h4>${o.product_name || 'Product'}</h4>
-            <small>ऑर्डर #${o.id} • ${new Date(o.created_at).toLocaleDateString()}</small>
+            <small>Order #${o.id} • ${new Date(o.created_at).toLocaleDateString()}</small>
           </div>
           <div style="text-align:right;">
             <div style="color: var(--accent); font-weight:700; margin-bottom:6px;">Rs ${o.amount}</div>
@@ -285,7 +285,7 @@ async function loadOrders() {
       `).join('');
     }
   } catch (err) {
-    console.log('Orders load नहीं हुए:', err.message);
+    console.log('Orders not loaded:', err.message);
   }
 }
 
