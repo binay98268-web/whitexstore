@@ -1,0 +1,10 @@
+{
+  "name": "whitexstore",
+  "version": "1.0.0",
+  "description": "WHITE X STORE - Gaming Cheats Store",
+  "dependencies": {
+    "pg": "^8.11.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0"
+  }
+}
